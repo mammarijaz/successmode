@@ -18,9 +18,21 @@ class SongController extends Controller
      *
      * @return void
      */
+    Private $database;
+    Private $bucket;
+
     public function __construct()
     {
         $this->middleware('auth');
+        $serviceAccount = ServiceAccount::fromJsonFile(__DIR__.'/FirebaseKey.json');
+        $firebase = (new Factory)
+        ->withServiceAccount($serviceAccount)
+        ->withDefaultStorageBucket('successmode-c4782.appspot.com')
+        ->create();
+
+        $this->database = $firebase->getDatabase()->getReference('/songs');
+        $storage = $firebase->getStorage();
+        $this->bucket=$storage->getBucket();
         
     }
 
@@ -32,7 +44,21 @@ class SongController extends Controller
     public function index()
     {
        // $users =  DB::table('users')->paginate(10);
-        return view('songs.index');
+        $ref=$this->database;
+       // $ref=$_database->getReference();
+        $songs=$ref->getValue();
+        
+        if($songs!=NULL)
+        {    
+            foreach ($songs as $song) {
+                 $allSongs[]=$song;
+             }
+        }
+        else  {
+                 $allSongs=[];
+             }     
+
+        return view('songs.index',['songs'=>$allSongs]);
     }
 
     /**
@@ -42,6 +68,7 @@ class SongController extends Controller
      */
     public function create()
     {
+
         return view('songs.create');
     }
 
@@ -53,57 +80,36 @@ class SongController extends Controller
      */
     public function store(StoreSong $request)
     {
+        $_database=$this->database;
+        $_bucket=$this->bucket;
         $validated = $request->validated();
-        $serviceAccount = ServiceAccount::fromJsonFile(__DIR__.'/FirebaseKey.json');
-        $firebase = (new Factory)
-        ->withServiceAccount($serviceAccount)
-        ->withDefaultStorageBucket('successmode-c4782.appspot.com')
-        ->create();
-
-        $database = $firebase->getDatabase();
-        $storage = $firebase->getStorage();
-        $bucket=$storage->getBucket(); 
-        
-
-      /*  $newPost = $database
-        ->getReference('/')
-        ->push([
-             'title' => 'Laravel FireBase Tutorial' ,
-             'category' => 'Laravel'
-        ]);
-        echo '<pre>';
-        print_r($newPost->getvalue()); */
-
-       // var_dump( $request->file('songFile')-> );
-       // die();
-    //    $filesystem = $storage->getFilesystem('meditations');
-     
-
-        $path=$request->file('songFile')->getRealPath();
-        $contentType=$request->file('songFile')->getMimeType();
-
+         
         
         $fileName=$request->file('songFile')->getClientOriginalName();
+
+        $newSong = $_database
+                ->push([
+                     'title' => $validated['name'],
+                     'originalFileName'=>$fileName
+                ]);
+        $firebaseSongKey=$newSong->getKey();
+
+        $path=$request->file('songFile')->getRealPath();
+        $contentType=$request->file('songFile')->getMimeType();   
+        
         
         $f = fopen($path, 'r');
-       
-       /* $options = ['prefix' =>  'meditations/'];    
-        foreach ($bucket->objects() as $object) {
-                printf('Object: %s' . PHP_EOL, $object->name());
-        }*/
-       
-        $bucket->upload($f, [
+        $fireBaseFile='Meditations'.$firebaseSongKey;
+        $newSongStorage=$_bucket->upload($f, [
             'metadata' => ['contentType' => $contentType],
-            'name' => 'meditations/'.$fileName,
+            'name' => 'meditations/'.$fireBaseFile,
             'predefinedAcl' => 'publicRead',
-        ]); 
-        
+        ]);
 
-       /* $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => bcrypt($validated['password']),
-        ]); */
+        $newSong->update([
+                        'url'=>$newSongStorage->gcsUri(),
+                         'fileName'=>$fireBaseFile 
+                        ]);
         return redirect('/admin/songs')->with('status', 'Song is added successfully!!!');
     }
 
@@ -113,9 +119,11 @@ class SongController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function show(User $user)
+    public function show($fileName)
     {
-        return view('users.show', ['user' => $user]);
+        $id=str_replace("Meditations","",$fileName);
+        $song=$this->database->getChild($id)->getValue();
+        return view('songs.show', ['song' => $song]);
     }
 
     /**
@@ -124,9 +132,11 @@ class SongController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function edit(User $user)
+    public function edit($fileName)
     {
-        return view('users.edit', ['user' => $user]);
+        $id=str_replace("Meditations","",$fileName);
+        $song=$this->database->getChild($id)->getValue();
+        return view('songs.edit', ['song' => $song]);
     }
 
     /**
@@ -136,14 +146,15 @@ class SongController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateUser $request, User $user)
+    public function update(Request $request, $fileName)
     {
-        $validated = $request->validated();
-        $user->name = $validated['name'];
-        if(!empty($validated['password']))
-            $user->password = bcrypt($validated['password']);
-        $user->save();
-        return redirect('/admin/users')->with('status', 'User is updated successfully!!!');
+        $id=str_replace("Meditations","",$fileName);
+        $song=$this->database->getChild($id);
+        
+        $song->update([
+                        'title'=>$request->input('title') 
+                        ]);
+        return redirect('/admin/songs')->with('status', 'Song is updated successfully!!!');
     }
 
     /**
@@ -152,9 +163,13 @@ class SongController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy(User $user)
+    public function destroy($fileName)
     {
-        $user->delete();
-        return redirect('/admin/users')->with('status', 'User is deleted successfully!!!');
+        
+        $id=str_replace("Meditations","",$fileName);
+        $song=$this->database->getChild($id)->remove();
+        $object=$this->bucket->object('meditations/'.$fileName); 
+        $object->delete();
+        return redirect('/admin/songs')->with('status', 'Song is deleted successfully!!!');
     }
 }

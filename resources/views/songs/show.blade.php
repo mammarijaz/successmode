@@ -4,34 +4,34 @@
 @section('content')
     <div class="container">
         <div class="">
-            <h2 class="">User#{{$user->id}}</h2>
+            <h2 class="">Song</h2>
         </div>
         <table class="table">
             <tbody>
             <tr>
-                <th scope="row">#</th>
-                <td>{{$user->id}}</td>
+                <th scope="row">{{ __('Title') }}</th>
+                <td>{{$song['title']}}</td>
             </tr>
             <tr>
-                <th scope="row">{{ __('Name') }}</th>
-                <td>{{$user->name}}</td>
+                <th scope="row">{{ __('Original File Name') }}</th>
+                <td>{{$song['originalFileName']}}</td>
             </tr>
             <tr>
-                <th scope="row">{{ __('Email') }}</th>
-                <td>{{$user->email}}</td>
+                <th scope="row">{{ __('URL') }}</th>
+                <td>{{$song['url']}}</td>
             </tr>
             <tr>
                 <th scope="row">{{ __('Actions') }}</th>
                 <td>
-                    <a class="btn btn-info" href="{{route('users.edit', $user->id)}}">Edit</a>
+                    <a class="btn btn-info" href="{{route('songs.edit', $song['fileName'])}}">Edit</a>
                 
-                        @include('users.deleteform', ['action' => route('users.destroy', $user->id), 'id' => $user->id])
+                        @include('songs.deleteform', ['action' => route('songs.destroy', $song['fileName']), 'id' => $song['fileName']])
                 </td>
             </tr>
             </tbody>
         </table>
         <div class="clearfix"></div>
         <hr>
-        <a class="btn btn-primary" href="{{url()->previous() == url()->current() ? '/admin/users' :url()->previous()}}">Back</a>
+        <a class="btn btn-primary" href="{{url()->previous() == url()->current() ? '/admin/songs' :url()->previous()}}">Back</a>
     </div>
 @endsection
