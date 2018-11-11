@@ -23,7 +23,7 @@
             <tr>
                 <th scope="row">{{ __('Actions') }}</th>
                 <td>
-                    <a class="btn btn-info" href="{{route('users.edit', $user->id)}}">Edit</a>
+                    <a class="btn btn-link" href="{{route('users.edit', $user->id)}}"><span class="glyphicon glyphicon-pencil"></span></a>
                 
                         @include('users.deleteform', ['action' => route('users.destroy', $user->id), 'id' => $user->id])
                 </td>

@@ -2,7 +2,7 @@
 
 
 @section('content')
-    <div class="container">
+    <div class="container" style="width:80%">
         <div>
             <h2>Users</h2>
             <a class="btn btn-success" href="{{route('users.create')}}">Create</a>
@@ -13,24 +13,24 @@
                 {{ session('status') }}
             </div>
         @endif
-        <table class="table">
+        <table id="userTable" class="display">
             <thead class="thead-dark">
             <tr>
-                <th scope="col">#</th>
-                <th scope="col">Name</th>
-                <th scope="col">Email</th>
-                <th scope="col">Actions</th>
+                <th >#</th>
+                <th >Name</th>
+                <th >Email</th>
+                <th >Actions</th>
             </tr>
             </thead>
             <tbody>
             @foreach($users as $user)
             <tr>
-                <th scope="row">{{$user->id}}</th>
+                <td>{{$user->id}}</td>
                 <td>{{$user->name}}</td>
                 <td>{{$user->email}}</td>
                 <td>
-                    <a class="btn btn-primary" href="{{route('users.show', $user->id)}}">Show</a>
-                    <a class="btn btn-info" href="{{route('users.edit', $user->id)}}">Edit</a>
+                    <a class="btn btn-link" href="{{route('users.show', $user->id)}}"><span class="glyphicon glyphicon-eye-open"></a>
+                    <a class="btn btn-link" href="{{route('users.edit', $user->id)}}"><span class="glyphicon glyphicon-pencil"></span></a>
                     @include('users.deleteform', ['action' => route('users.destroy', $user->id), 'id' => $user->id])
                   
                 </td>
@@ -39,6 +39,28 @@
             </tbody>
         </table>
 
-        {{ $users->links() }}
+        
     </div>
 @endsection
+
+
+
+
+@section('js')
+    <script> 
+          var table=$("#userTable").DataTable({
+                              responsive: true,
+                              "scrollX": true,
+                              columnDefs: [
+                                { "width": "80px", "targets": [0] },
+                                { "width": "200px", "targets": [2] },       
+                                { "width": "150px", "targets": [1,3] }
+                            ] 
+
+                          });
+          $('#container').css( 'display', 'block' );
+          table.columns.adjust().draw();
+
+
+    </script>
+@stop

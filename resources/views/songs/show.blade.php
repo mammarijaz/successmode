@@ -23,7 +23,7 @@
             <tr>
                 <th scope="row">{{ __('Actions') }}</th>
                 <td>
-                    <a class="btn btn-info" href="{{route('songs.edit', $song['fileName'])}}">Edit</a>
+                    <a class="btn btn-link" href="{{route('songs.edit', $song['fileName'])}}"><span class="glyphicon glyphicon-pencil"></span></a>
                 
                         @include('songs.deleteform', ['action' => route('songs.destroy', $song['fileName']), 'id' => $song['fileName']])
                 </td>

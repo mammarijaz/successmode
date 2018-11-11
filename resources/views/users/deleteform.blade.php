@@ -1,6 +1,6 @@
 <!-- Button trigger modal -->
-<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete-modal-{{$id}}">
-    {{ __('Delete') }}
+<button type="button" class="btn btn-link" data-toggle="modal" data-target="#delete-modal-{{$id}}">
+    <span class="glyphicon glyphicon-trash"></span>
 </button>
 
 <!-- Modal -->
