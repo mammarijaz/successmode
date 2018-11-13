@@ -14,3 +14,4 @@ yarn-error.log
 .phpunit.result.cache
 .phpintel/
 
+app/Http/Controllers/FirebaseKey.json
