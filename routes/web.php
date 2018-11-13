@@ -19,4 +19,6 @@ Route::resource('/admin/users', 'UserController');
 
 Route::resource('/admin/songs', 'SongController');
 
+Route::resource('/admin/appusers', 'AppuserController');
+
 Route::get('/home', 'HomeController@index')->name('home');

@@ -13,7 +13,7 @@
                 {{ session('status') }}
             </div>
         @endif
-        <table id="songTable" class="cell-border">
+        <table id="songTable" class="table table-striped table-bordered" style="width:100%">
             <thead>
             <tr>
                 <th >Title</th>
@@ -50,7 +50,6 @@
                                 { "width": "400px", "targets": [1] },       
                                 { "width": "150px", "targets": [2] }
                             ]  });
-          $('#container').css( 'display', 'block' );
-          table.columns.adjust().draw();  
+            
                           </script>
 @stop

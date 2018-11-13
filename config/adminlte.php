@@ -123,6 +123,11 @@ return [
                     'url'  => '/admin/users',
                     'icon_color' => 'aqua',
                 ],
+                [
+                    'text' => 'App',
+                    'url'  => '/admin/appusers',
+                    'icon_color' => 'aqua',
+                ],
             ],
         ],
         
